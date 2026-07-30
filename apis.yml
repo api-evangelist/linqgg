@@ -1,22 +1,147 @@
 aid: linqgg
 name: Linq.gg
-description: Linq.gg is a company surfaced as a portfolio company of a16z and added to the API Evangelist
-  network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: 'LinQ is the wallet, payments and loyalty platform operated by Galactica
+  Games, Inc. (dba Toffee) for game developers building loyalty programs, real-money
+  gaming (RMG) and branded debit-card experiences. Games integrate a LinQ Wallet account
+  for each player, then deposit, withdraw, transfer and reconcile funds against internal
+  game currencies. The LinQ Wallet Public API is a gRPC / Protocol Buffers surface
+  published on the Buf Schema Registry as buf.build/linq/linq, organised into Geo
+  (IP and coordinate restriction checks), Auth (anonymous game sign-in and wallet-linked
+  user sign-in), Money (accounts, balances, replenishment orders, transfers, Brazil
+  Pix, operations history) and Sandbox (integration-test helpers) modules. Client
+  libraries are generated from the registry for TypeScript, JavaScript and other targets,
+  and a first-party Unity SDK handles PCI-compliant native card and Apple Pay checkout
+  on device.'
 url: https://raw.githubusercontent.com/api-evangelist/linqgg/refs/heads/main/apis.yml
+accessModel:
+  pricing: unknown
+  onboarding: open
+  trial: false
+  try_now: false
+  public: true
+  label: Open access
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://framerusercontent.com/images/IDaPLV2CTzzUnLl1BCRzzHVprF4.png
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
 - a16z
-x-tier: stub
-x-tier-reason: portfolio-lead
+x-operator: Galactica Games, Inc. (dba Toffee)
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
 tags:
 - Company
-apis: []
+- Gaming
+- Payments
+- Wallet
+- Loyalty
+- Fintech
+- Real Money Gaming
+- gRPC
+- Geolocation
+- Authentication
+apis:
+- aid: linqgg:linq-wallet-public-api
+  name: LinQ Wallet Public API
+  description: 'gRPC / Protocol Buffers API for integrating a game with LinQ Wallet
+    services. Covers geo restriction checks by IP and coordinates, anonymous and wallet-linked
+    user authentication, account balances, deposits and withdrawals against internal
+    game currencies, replenishment and transfer orders, native card / Apple Pay /
+    Brazil Pix checkout, operations history and sandbox test helpers. Schemas are
+    published publicly on the Buf Schema Registry; clients are generated per language
+    rather than hand-written.'
+  humanURL: https://docs.linq.gg/
+  baseURL: https://services.galactica.games
+  tags:
+  - Wallet
+  - Payments
+  - Gaming
+  - gRPC
+  - Protobuf
+  properties:
+  - type: Documentation
+    url: https://docs.linq.gg/
+  - type: APIReference
+    url: https://buf.build/linq/linq
+  - type: GettingStarted
+    url: https://docs.linq.gg/getting-started
+  - type: Protobuf
+    url: grpc/linqgg-services.yml
+  - type: Authentication
+    url: authentication/linqgg-authentication.yml
+  - type: ErrorCatalog
+    url: errors/linqgg-error-codes.yml
+  - type: DataModel
+    url: data-model/linqgg-data-model.yml
+common:
+- type: DomainSecurity
+  url: security/linqgg-domain-security.yml
+- type: Protobuf
+  url: grpc/linqgg-services.yml
+- type: Packages
+  url: packages/linqgg-packages.yml
+- type: SDKs
+  url: packages/linqgg-packages.yml
+- type: Authentication
+  url: authentication/linqgg-authentication.yml
+- type: Conventions
+  url: conventions/linqgg-conventions.yml
+- type: Idempotency
+  url: conventions/linqgg-conventions.yml
+- type: ErrorCatalog
+  url: errors/linqgg-error-codes.yml
+- type: Lifecycle
+  url: lifecycle/linqgg-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/linqgg-lifecycle.yml
+- type: Conformance
+  url: conformance/linqgg-conformance.yml
+- type: Compliance
+  url: conformance/linqgg-conformance.yml
+- type: Sandbox
+  url: sandbox/linqgg-sandbox.yml
+- type: ChangeLog
+  url: changelog/linqgg-changelog.yml
+- type: Components
+  url: components/linqgg-components.yml
+- type: DataModel
+  url: data-model/linqgg-data-model.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/linqgg-llms.txt
+- type: Roadmap
+  url: https://github.com/linqgg/unity-sdk/blob/main/VISION.md
+- type: DeveloperPortal
+  url: https://docs.linq.gg/
+- type: Documentation
+  url: https://docs.linq.gg/
+- type: APIReference
+  url: https://buf.build/linq/linq
+- type: GettingStarted
+  url: https://docs.linq.gg/getting-started
+- type: Support
+  url: https://docs.linq.gg/contact
+- type: Blog
+  url: https://linq.gg/blog
+- type: GitHubOrganization
+  url: https://github.com/linqgg
+- type: TermsOfService
+  url: https://linq.gg/terms-of-use
+- type: PrivacyPolicy
+  url: https://linq.gg/privacy-policy
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence
