@@ -1,0 +1,73 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.money.accounts.v2;
+
+import "google/protobuf/empty.proto";
+
+// Object containing current and available balances
+// Values presented in currency coins, which means
+// that values should be devided by 100
+message Balance {
+  // Current balance of the account in coins
+  uint32 current = 1;
+
+  // Available to spend balance of the user in coins
+  uint32 available = 2;
+}
+
+// Returns detailed information about user balance on the requested account
+message AccountBalance {
+
+  // Number of the internal account
+  string number = 1;
+
+  // Internal currency 3-letters code
+  // LNQ for wallet balance, for example
+  string currency = 2;
+
+  // Actual balance of the user in coins
+  Balance balance = 3;
+}
+
+// List of active accounts for the current user
+message AccountsResponse {
+  // Returns list of accounts, limited by user access
+  // For the game request only LNQ and this game accounts will be returned
+  repeated AccountBalance accounts = 1;
+}
+
+// Request to apply custom reward to the user account
+message CustomRewardRequest {
+  // Amount of money for reward in coins
+  int32 amount = 1;
+  // Reason for the reward, has to be explained
+  string reason = 2;
+  // Reference to the transaction, if any
+  optional string reference = 3;
+}
+
+// Returns order details and account state
+message AppliedRewardOrder {
+  // Order identifier, uuid string
+  string id = 1;
+  // Amount of the order for bet or win
+  uint32 amount = 2;
+  // Order status after transaction has beed applied
+  string status = 3;
+  // Reference data that was placed into the order during the creation
+  string reference = 4;
+}
+
+// Service allows to get access to data related to
+// the user accounts in the internal wallet systems
+service AccountsService {
+
+  // Return list of available user accounts with its balances
+  rpc GetActualBalances(google.protobuf.Empty) returns (AccountsResponse) {};
+
+  // Apply custom reward to the user account, works only if allowed
+  rpc ApplyCustomReward(CustomRewardRequest) returns (AppliedRewardOrder) {};
+
+}

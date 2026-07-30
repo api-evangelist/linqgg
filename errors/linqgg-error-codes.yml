@@ -1,0 +1,130 @@
+generated: '2026-07-19'
+method: derived
+source: grpc/linqgg-services.yml
+docs: https://docs.linq.gg/modules/money
+description: >-
+  LinQ publishes no dedicated error-code reference and does not use RFC 9457
+  problem+json. Errors surface as native gRPC status codes; most business
+  outcomes are carried in-band on successful responses as status enums and
+  boolean flags. This catalog is derived from the published .proto contracts and
+  the Unity SDK exception taxonomy — it is a faithful reading of what LinQ
+  documents, not an invented registry.
+format: grpc-status
+envelope:
+  wire: gRPC status code + status message
+  problem_json: false
+  note: >-
+    No error detail message type is defined anywhere in buf.build/linq/linq, so
+    there is no structured machine-readable error payload.
+in_band_outcomes:
+- id: order_status
+  field: status
+  type: string
+  present_on:
+  - linq.money.payments.v1.OrderStatusResponse
+  - linq.money.payments.v1.OrderResponse
+  - linq.money.operations.v1.HistoryEntry
+  - linq.money.accounts.v1.MoneyResponse
+  - linq.money.accounts.v2.AppliedRewardOrder
+  values:
+  - value: pending
+    meaning: just created order
+    terminal: false
+  - value: awaiting
+    meaning: LinQ checkout created, awaiting payment from the user
+    terminal: false
+  - value: processing
+    meaning: order being handled by services to validate payment internally
+    terminal: false
+  - value: accepted
+    meaning: order was paid and its transaction was applied
+    terminal: false
+  - value: declined
+    meaning: order was declined by the payment provider due to some kind of error
+    terminal: true
+    action: >-
+      Surface a payment-failed message to the player and let them retry with a
+      new order. LinQ publishes no per-decline reason code.
+  - value: completed
+    meaning: order completed; the status may be used as final for further decisions
+    terminal: true
+    action: apply the corresponding internal game operation
+  - value: cancelled
+    meaning: order was cancelled by the user
+    terminal: true
+  - value: terminated
+    meaning: order was cancelled by the system
+    terminal: true
+- id: payment_success
+  field: success
+  type: bool
+  present_on:
+  - linq.money.payments.v1.PaymentResponse
+  meaning: whether the native payment succeeded
+  companions:
+    retry_order_id: order id recommended for retry (Apple Pay)
+    script_3ds: 3DS check script that must be opened in a webview
+- id: access_allowed
+  field: allowed
+  type: bool
+  present_on:
+  - linq.geo.operations.v1.Access
+  - linq.geo.restrictions.v2.AccessStatus
+  meaning: whether the requested operation or app access is permitted at the detected location
+  action: >-
+    An IP ban restricts use of the app from the region; a coordinate ban blocks
+    individual money operations while still allowing demo or free play.
+- id: limit_reached
+  field: is_reached
+  type: bool
+  present_on:
+  - linq.money.payments.v1.OperationLimitResponse
+  meaning: whether the monetary operation limit has been reached
+  companions:
+    remains: how much may still be spent before the limit is reached
+    limit: the current limit
+  action: >-
+    For anonymous profiles the total deposit cap is 20.00; prompt the player to
+    sign in with the LinQ wallet or supply account data to lift it.
+- id: mismatched_user_fields
+  field: mismatched_user_fields
+  type: map<string, string>
+  present_on:
+  - linq.auth.user.v1.SignUpGameUserResponse
+  meaning: >-
+    Supplied user data that did not match the existing wallet profile. Returned
+    alongside a valid user_token rather than as an error.
+sdk_exceptions:
+  source: https://github.com/linqgg/unity-sdk
+  language: csharp
+  entries:
+  - name: InvalidOperationException
+    raised_by: LinqSDK.CheckoutByOrdinaryCard
+    meaning: the ordinary card checkout request failed
+    action: catch and show a payment-failed message
+  - name: PaymentFailureException
+    raised_by: LinqSDK.CheckoutByApplePayCard
+    meaning: payment was authorized by the user but failed on the provider side
+    action: show the player a message that payment has failed
+  - name: PaymentDiscardException
+    raised_by: LinqSDK.CheckoutByApplePayCard
+    meaning: the user closed the Apple Pay payment sheet
+    action: handle as a cancellation, not a failure
+  - name: PaymentUnknownException
+    raised_by: LinqSDK.CheckoutByApplePayCard
+    meaning: Apple Pay is not supported on this device (includes the Unity Editor)
+    action: do nothing; fall back to ordinary card checkout
+  note: >-
+    The SDK raises exceptions rather than returning error objects, so callers must
+    wrap every checkout call in try/catch to avoid hanging the game.
+environment_errors:
+- condition: calling a linq.sandbox.helpers.v1 method against production
+  behaviour: >-
+    Documented to error with "not implemented method" — sandbox helpers do not
+    exist in the production environment.
+decline_codes:
+  published: false
+  note: >-
+    LinQ is a payments provider but publishes no decline-code reference. Declines
+    are collapsed into the single `declined` order status, so no
+    errors/linqgg-decline-codes.yml artifact is produced.

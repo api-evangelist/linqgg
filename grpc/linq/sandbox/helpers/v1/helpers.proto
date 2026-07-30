@@ -1,0 +1,51 @@
+// Copyright 2024 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.sandbox.helpers.v1;
+
+import "google/protobuf/empty.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "SandboxHelpersProto";
+option java_package = "games.galactica.services.api";
+option objc_class_prefix = "LAPI";
+
+// Message that contains token that should be validated.
+message VerifyPlayerTokenRequest {
+  // Nickname or alias of the wallet user, visible in the app.
+  string alias = 1;
+  // Token requested during sign in request.
+  string token = 2;
+}
+
+enum OrderStatus {
+  COMPLETED = 0;
+  DECLINED = 1;
+}
+
+// Data to update order
+message UpdateOrderRequest {
+  // Order id
+  string id = 1;
+  // Order status
+  optional OrderStatus status = 2;
+}
+
+// Special service that provides additional methods
+// to make integration process much easier. May be used for
+// setuping integration tests from the partner side.
+service HelpersService {
+
+  // Method that emulates confirmation sign in the game on wallet side.
+  // Normally game requests special token and send it to the wallet app
+  // via deep link, when the wallet app validates the token.
+  // This method receives the same token and validate it behalf the user.
+  rpc VerifyPlayerToken(VerifyPlayerTokenRequest)
+    returns (google.protobuf.Empty) {}
+
+  // Updates order in out database
+  // Supports updating status to declined or completed
+  // Should be used only in the case with Pix Payment(because normal process currenly not possible without manual work)
+  rpc UpdateOrder(UpdateOrderRequest) returns (google.protobuf.Empty) {}
+}

@@ -1,0 +1,149 @@
+generated: '2026-07-19'
+method: searched
+source: https://docs.linq.gg/modules/money
+derived_from: grpc/linqgg-services.yml
+description: >-
+  Standards and cross-cutting conventions the LinQ Wallet Public API conforms to,
+  each with the evidence it was asserted from. LinQ operates no trust centre and
+  publishes no audit reports; the compliance claims below are the ones stated in
+  its own developer documentation.
+standards:
+- id: grpc
+  conforms: true
+  evidence: >-
+    "For integration, the gRPC procedure call protocol is used together with
+    Protocol Buffers." — https://docs.linq.gg/
+- id: protobuf3
+  conforms: true
+  evidence: Every .proto in buf.build/linq/linq declares `syntax = "proto3"`.
+- id: buf-schema-registry
+  conforms: true
+  evidence: >-
+    The full API contract is published as a public BSR module,
+    https://buf.build/linq/linq, with generated SDKs on the Assets tab.
+- id: idempotency
+  conforms: true
+  evidence: >-
+    idempotency_key on MoneyRequest and TransferOrderRequest; NewReplenishOrder
+    returns the pre-existing order for an unprocessed duplicate.
+  detail: conventions/linqgg-conventions.yml
+- id: pagination
+  conforms: true
+  style: cursor
+  evidence: >-
+    OrdersHistoryRequest.limit / next_id and OrdersHistory.next_id on
+    OperationsService.GetOrdersHistory.
+- id: pci-dss
+  conforms: true
+  scope: card data is tokenized off-device by certified third parties; LinQ does not handle raw PAN
+  evidence: >-
+    "Such an approach makes the process much easier and PCI DSS compliant at the
+    same time... We use certified third-party services for card tokenization in
+    combination with anti-fraud checks, and we do not handle raw user payment
+    information as well." — https://docs.linq.gg/modules/money
+  mechanism:
+  - TokenEx tokenization (TokenexConfig, CardTokenexPayment token + token_hmac)
+  - card data must never be sent to the game's own backend services
+  certification_document_published: false
+- id: 3d-secure
+  conforms: true
+  evidence: >-
+    PaymentResponse.script_3ds carries a 3DS check script to be opened in a
+    webview; Unity SDK v0.5.0 "Integrating 3DS check into SDK".
+- id: apple-pay
+  conforms: true
+  evidence: >-
+    ApplePayConfig (merchant_id, supported_networks, merchant_capabilities,
+    required_billing_contact_fields) and NativePaymentsService.GetApplePayConfig.
+- id: pix
+  conforms: true
+  scope: Brazil instant payments
+  evidence: PaymentsService.CreatePixOrder, PixPaymentRequest.tax_id (CPF), PixResponse.code.
+- id: kyc
+  conforms: true
+  evidence: >-
+    "This allows you to have full access to all the features provided by LinQ
+    services. In particular, go through KYC..." — https://docs.linq.gg/
+- id: geo-restriction-compliance
+  conforms: true
+  scope: sanctions and per-jurisdiction licensing for real-money gaming
+  evidence: >-
+    "Location verification is required to satisfy the requirements of the local
+    government where the business is conducted... there are restrictions on
+    financial transactions in territories included in the sanctions lists." —
+    https://docs.linq.gg/
+  mechanism:
+  - RestrictionsService.IsAccessAllowed (IP-level app access)
+  - LocationService.IsOperationAllowed (coordinate-level per-operation gating)
+- id: anti-fraud-device-profiling
+  conforms: true
+  evidence: KountConfig / KountData device data collection on every native card payment.
+- id: iso-3166-1-alpha-2
+  conforms: true
+  evidence: >-
+    BillingAddress.country and UserLocationData.country are documented as
+    two-letter ISO 3166 country codes; the Unity SDK README links the standard.
+- id: iso-4217
+  conforms: partial
+  evidence: >-
+    PaymentProfileResponse.currency is a real 3-letter ISO code (USD, GBP, BRL),
+    but internal account currencies (LNQ, GSC, GMC) are LinQ-private codes that
+    only follow the 3-letter shape.
+- id: semver
+  conforms: true
+  scope: Unity SDK releases
+  evidence: CHANGELOG.md adheres to https://semver.org/spec/v2.0.0.html
+- id: keep-a-changelog
+  conforms: true
+  scope: Unity SDK releases
+  evidence: CHANGELOG.md follows https://keepachangelog.com/en/1.0.0/
+- id: rfc9457
+  conforms: false
+  evidence: >-
+    No problem+json envelope; errors are native gRPC statuses with no structured
+    detail message. See errors/linqgg-error-codes.yml.
+- id: oauth2
+  conforms: false
+  evidence: >-
+    Opaque bearer tokens minted by AuthGameService / AuthUserService; no
+    authorization server, no scopes, no /.well-known/oauth-authorization-server.
+- id: oidc
+  conforms: false
+  evidence: No /.well-known/openid-configuration on any LinQ or Galactica Games host.
+- id: openapi
+  conforms: false
+  evidence: No OpenAPI or Swagger description is published; gRPC is the only contract.
+- id: asyncapi
+  conforms: false
+  evidence: >-
+    No event, streaming or webhook surface is published. Order completion is
+    discovered by polling PaymentsService.GetOrderStatus.
+- id: rfc8594
+  conforms: false
+  evidence: >-
+    No Sunset or Deprecation headers. Deprecation is signalled in-band via
+    protobuf `option deprecated = true`. See lifecycle/linqgg-lifecycle.yml.
+- id: scim
+  conforms: false
+  evidence: No user-provisioning surface published.
+- id: fapi
+  conforms: false
+  evidence: No FAPI profile claimed; the API is not an OAuth authorization surface.
+- id: psd2
+  conforms: false
+  evidence: >-
+    No open-banking surface. Operating jurisdictions documented are the US and
+    Brazil.
+audits_and_certifications:
+  published: false
+  probed:
+  - SOC 2
+  - ISO 27001
+  - PCI DSS Attestation of Compliance
+  - HIPAA
+  - FedRAMP
+  note: >-
+    A PCI DSS compliance claim is made in the developer documentation, but no
+    certificate, AoC or trust centre is published. See
+    security/linqgg-domain-security.yml; probe-security-programs.py found no
+    vulnerability disclosure programme and no trust centre.

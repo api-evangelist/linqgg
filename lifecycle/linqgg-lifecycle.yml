@@ -1,0 +1,92 @@
+generated: '2026-07-19'
+method: derived
+source: grpc/linqgg-services.yml
+docs: https://docs.linq.gg/getting-started
+description: >-
+  LinQ publishes no prose versioning, deprecation or SLA policy. What it does
+  publish is machine-readable: protobuf package versioning and explicit
+  `option deprecated = true` markers in the .proto files on the Buf Schema
+  Registry. This artifact records the observable lifecycle posture.
+versioning:
+  scheme: protobuf package version segment
+  pattern: <domain>.<module>.v<N>
+  published_policy: false
+  observed_practice: >-
+    A breaking revision ships as a new versioned package published alongside the
+    old one. Both remain resolvable from the registry; consumers migrate by
+    changing the import path.
+  stability_statement: >-
+    "The full implementation and description of the API Reference is still in
+    progress and requires some work on our part, but there are no plans to change
+    the method signatures." — https://docs.linq.gg/getting-started
+  current_versions:
+    linq.auth.game: v1
+    linq.auth.user: v1
+    linq.geo.operations: v1
+    linq.geo.restrictions: v2
+    linq.money.accounts: v2
+    linq.money.operations: v1
+    linq.money.payments: v1
+    linq.sandbox.helpers: v1
+deprecation:
+  policy_published: false
+  mechanism: in-spec protobuf `option deprecated = true`
+  sunset_headers: false
+  rfc8594: false
+  deprecated_surfaces:
+  - package: linq.geo.restrictions.v1
+    file: grpc/linq/geo/restrictions/v1/restrictions.proto
+    scope: whole file (file-level `option deprecated = true`)
+    replaced_by: linq.geo.restrictions.v2
+    services:
+    - service: RestrictionsService
+      deprecated: true
+      methods:
+      - name: isAccessAllowed
+        deprecated: true
+        replacement: linq.geo.restrictions.v2.RestrictionsService.IsAccessAllowed
+        notes: >-
+          The v2 method takes google.protobuf.Empty instead of AccessAppRequest
+          and returns the shared linq.shared.UserLocationData type. The lowercase
+          method name is also corrected to IsAccessAllowed in v2.
+    - service: ConfigurationService
+      deprecated: true
+      methods:
+      - name: getAvoidedRegions
+        deprecated: true
+        replacement: none published
+        notes: >-
+          No v2 equivalent exists in the public registry module, so the avoided
+          regions configuration lookup has no documented successor.
+  soft_deprecations:
+  - field: OrdersHistoryRequest.assets
+    marker: in-spec comment "do not use, has no effect"
+    replaced_by: none
+  superseded_but_not_marked:
+  - package: linq.money.accounts.v1
+    note: >-
+      v2 exists and adds Balance.current / Balance.available and
+      ApplyCustomReward, but v1 is NOT marked deprecated and still carries the
+      idempotent PutMoney / GetMoney methods that v2 does not, so both versions
+      remain in active use.
+status_page:
+  published: false
+  probed:
+  - url: https://status.linq.gg
+    result: no DNS resolution
+sla:
+  published: false
+support:
+  channel: email
+  addresses:
+  - support@galactica.games
+  - help@galactica.games
+  issue_tracker: https://github.com/linqgg/unity-sdk/issues
+  url: https://docs.linq.gg/contact
+  response_target: >-
+    "We aim to respond as quickly as possible." — no numeric target published.
+roadmap:
+  published: partial
+  url: https://github.com/linqgg/unity-sdk/blob/main/VISION.md
+  scope: Unity SDK only, not the platform API
+release_history: changelog/linqgg-changelog.yml

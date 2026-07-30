@@ -1,0 +1,81 @@
+generated: '2026-07-19'
+method: searched
+source: https://docs.linq.gg/modules/money
+description: >-
+  LinQ ships no web component or element library. Its client-side surface is
+  game-embedded: a LinQ-hosted checkout page rendered inside a webview, native
+  payment sheets driven by the Unity SDK, and the separate LinQ Wallet consumer
+  app that owns account linking, KYC and withdrawal. Recorded here because these
+  are prebuilt hosted surfaces a developer embeds rather than SDK calls.
+families:
+- id: hosted-checkout
+  name: LinQ Hosted Checkout
+  kind: hosted page rendered in a webview
+  description: >-
+    PaymentsService.NewReplenishOrder returns OrderStatusResponse.checkout, a
+    link to a LinQ-hosted payment form. The game opens it in a webview; after the
+    payment succeeds or fails, control returns to the game and the order status
+    must be re-read with GetOrderStatus.
+  entry_point: OrderStatusResponse.checkout
+  loader: >-
+    UniWebView (bundled with the Unity SDK). The page detects the embed via a
+    window.uniwebview flag injected with EvaluateJavaScript, then posts a
+    completion message carrying a success argument back to Unity through
+    OnMessageReceived.
+  handoff_events:
+  - OnPageFinished
+  - 'OnMessageReceived path=completion args={success}'
+- id: native-payment
+  name: Native Payment Surfaces
+  kind: on-device native UI driven by the Unity SDK
+  description: >-
+    In-game checkout with no webview. The game builds its own card-entry UI and
+    hands the values to the SDK, which tokenizes them off-device so raw card data
+    never reaches the game backend.
+  loader: LinQ Unity SDK (https://github.com/linqgg/unity-sdk)
+  surfaces:
+  - id: ordinary-card
+    api: LinqSDK.CheckoutByOrdinaryCard(order, details, address)
+    developer_supplied_ui:
+    - card number
+    - protection code (CVV)
+    - cardholder name
+    - expiration date
+    - billing address
+    constraint: >-
+      Captured card data must not be sent to any of the game's own backend
+      services; it goes only to the specified SDK methods.
+  - id: apple-pay
+    api: LinqSDK.CheckoutByApplePayCard(order)
+    description: >-
+      Native Apple Pay sheet. Requires no billing address or card details — they
+      come from the user's Apple Wallet.
+    config_source: NativePaymentsService.GetApplePayConfig
+  - id: three-ds
+    api: PaymentResponse.script_3ds
+    description: 3DS challenge script opened in a webview when the issuer requires it.
+    since: Unity SDK v0.5.0
+  - id: pix-code
+    api: PaymentsService.CreatePixOrder
+    description: >-
+      Returns a Pix code string the game renders for the Brazilian player to pay,
+      then polls GetOrderStatus.
+- id: linq-wallet-app
+  name: LinQ Wallet App
+  kind: separate consumer application
+  description: >-
+    Owns account creation, sign-in confirmation, KYC and withdrawal to a bank
+    account or card. Games hand off to it by deep link or associated domain to
+    link a game account to a wallet account.
+  ios: https://apps.apple.com/us/app/linq-wallet/id6447305486
+  handoff:
+    deep_link_stage: 'linq-stg://?user_token={token}'
+    deep_link_production: 'linq://?user_token={token}'
+    associated_domain_stage: https://a.stg.linq.gg
+    associated_domain_production: https://a.linq.gg
+    fallback: App Store install, with Keychain token handoff after install
+not_published:
+- web component / custom element library
+- JavaScript embed or element library for browser checkout
+- embedded analytics or merchant dashboard components
+- prebuilt React / Vue / Swift / Kotlin UI kits

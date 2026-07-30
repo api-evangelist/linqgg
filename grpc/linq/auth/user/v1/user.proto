@@ -1,0 +1,81 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.auth.user.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "AuthUserProto";
+option java_package = "games.galactica.services.api";
+option objc_class_prefix = "LAPI";
+
+// User data to create user
+message UserData {
+  // Phone number of the user
+  string phone = 1;
+  // Email of the user
+  string email = 2;
+  // First name of the user
+  string first_name = 3;
+  // Last name of the user
+  string last_name = 4;
+  // Date of birth of ther user
+  google.protobuf.Timestamp dob = 5;
+}
+
+message SignUpGameUserRequest {
+  // User data to match or create user, see UserData description
+  optional UserData user = 1;
+}
+
+// Returns special user token with which it is possible
+// to ask wallet services to register user
+// as wallet linked user.
+message SignUpGameUserResponse {
+  // Temporary user token for obtaining real wallet acces_token
+  string user_token = 1;
+  // Mismatched user data
+  map<string, string> mismatched_user_fields = 2;
+}
+
+// Using temporary user token creates request for login in wallet services
+message SignInGameUserRequest {
+  // Special temporary user token given on game auth stage
+  string user_token = 1;
+  // Flag that forces usege of existing wallet account and
+  // ignores previously created anonymous account
+  optional bool ignore_game_payment_accounts_duplicates = 2;
+}
+
+// Returns valid access token and actual user data from the wallet
+message SignInGameUserResponse {
+  // Access token, which has to stored on your side to make ability
+  // to do requests on behalf of user
+  string access_token = 1;
+  // User id
+  int32 id = 2;
+  // User data, see UserData definition
+  UserData user = 3;
+}
+
+message SaveGameUserRequest {
+  // User data to save for anon profile
+  UserData user = 1;
+}
+
+// Allows to sign up and login in Wallet services
+service AuthUserService {
+  // Returns temporary user token which should be passed
+  // to LinQ app to process with sign in
+  rpc SignUpGameUser(SignUpGameUserRequest) returns (SignUpGameUserResponse) {}
+  // Links existing user account with real wallet account,
+  // providing valid access_token for protected operations.
+  // With this token user has access to all actions.
+  rpc SignInGameUser(SignInGameUserRequest) returns (SignInGameUserResponse) {}
+  // Save game user data to anon profile
+  // (to overcome some money operations limits)
+  rpc SaveGameUser(SaveGameUserRequest) returns (google.protobuf.Empty) {}
+}

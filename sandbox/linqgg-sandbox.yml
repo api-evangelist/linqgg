@@ -1,0 +1,107 @@
+generated: '2026-07-19'
+method: searched
+source: https://docs.linq.gg/getting-started
+docs:
+- https://docs.linq.gg/modules/money
+- https://github.com/linqgg/unity-sdk
+description: >-
+  LinQ runs a separate stage environment that partners are told to integrate
+  against first, plus a dedicated Sandbox protobuf module of helper RPCs that
+  replace steps normally requiring a human in the LinQ app. All values below are
+  published verbatim by LinQ; none are invented.
+environments:
+- id: stage
+  host: services.stage.galactica.games
+  alternate_host: services-stage-mx6hvkth4a-uc.a.run.app
+  default_for_integration: true
+  note: >-
+    "Production and stage environments are available for connection; to start
+    integration, you should use the data for stage."
+- id: production
+  host: services.galactica.games
+access:
+  mechanism: >-
+    A dedicated token is generated on request and used for the initial
+    service-to-service connection; user tokens are issued from it thereafter.
+    Separate secret keys are issued per environment.
+  unity_sdk_config: 'LinqSDK.InitSDK("https://services.stage.galactica.games", "secret-key")'
+  deep_link_schemes:
+    stage: 'linq-stg://?user_token={token}'
+    production: 'linq://?user_token={token}'
+  associated_domains:
+    stage: https://a.stg.linq.gg
+    production: https://a.linq.gg
+  keychain_access_groups:
+    stage: $(AppIdentifierPrefix)games.galactica.linq.stg.shared
+    production: $(AppIdentifierPrefix)games.galactica.linq.shared
+  testflight_note: >-
+    The associated domain redirects to TestFlight for staging and to the App Store
+    for production when the LinQ app is not installed.
+sandbox_module:
+  package: linq.sandbox.helpers.v1
+  service: HelpersService
+  file: grpc/linq/sandbox/helpers/v1/helpers.proto
+  production_behaviour: >-
+    Methods do not exist in production; calling them there raises "not implemented
+    method" errors.
+  methods:
+  - name: VerifyPlayerToken
+    request_fields:
+    - alias (wallet user nickname visible in the app)
+    - token (the token requested during sign in)
+    purpose: >-
+      Emulates the user confirming the sign-in inside the LinQ wallet app, so the
+      account-linking handshake can be automated instead of requiring a real
+      deep-link tap.
+  - name: UpdateOrder
+    request_fields:
+    - id (order id)
+    - status (COMPLETED | DECLINED)
+    purpose: >-
+      Forces an order to a terminal status. Documented as intended for Pix
+      payments, where the normal flow is not completable without manual work.
+test_cards:
+- id: ordinary_card
+  network: visa
+  number: '4242 4242 4242 4242'
+  expiration: 12/2027
+  holder_name: CARD HOLDER
+  cvv: '123'
+  usage: ordinary card checkout via LinqSDK.CheckoutByOrdinaryCard
+- id: apple_pay
+  network: mastercard
+  number: '5204 2452 5000 1488'
+  expiration: 11/2022
+  cvv: '111'
+  usage: >-
+    Apple Pay sandbox. Requires an Apple Pay sandbox tester account. Authorization
+    may succeed with any card, but transactions fail on the provider side.
+  reference: https://developer.apple.com/apple-pay/sandbox-testing/
+magic_values:
+- id: nofraud
+  field: cardholder name
+  value: NOFRAUD
+  effect: >-
+    Skips the Kount anti-fraud device checks. Provided because the native
+    anti-fraud modules do not work when the game runs on Android or from the
+    Unity Editor, which would otherwise block the flow.
+- id: kount_disabled
+  field: KountConfig.client_id
+  effect: Kount device data collection is disabled when client_id is not specified.
+- id: kount_is_prod
+  field: KountConfig.is_prod
+  effect: Flags whether the Kount Data Collector should run against production.
+test_data_notes:
+- Brazil Pix orders cannot complete automatically in stage; use
+  HelpersService.UpdateOrder to drive the order to COMPLETED or DECLINED.
+- Anonymous profiles are capped at a total deposit amount of 20.00, which will be
+  hit quickly in repeated test runs; use SaveGameUser or wallet sign-in to lift it.
+- The first suggested smoke test is RestrictionsService.IsAccessAllowed, which
+  requires no authorization at all.
+not_published:
+- time simulation / test clocks
+- fixture or trigger tooling beyond the two HelpersService methods
+- test bank accounts
+- a hosted API console or interactive playground (Buf Studio at
+  https://buf.build/studio is linked from the docs as the way to exercise the
+  gRPC surface, but it is Buf's generic tool, not a LinQ-operated console)

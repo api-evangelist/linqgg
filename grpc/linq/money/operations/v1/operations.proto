@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package linq.money.operations.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "MoneyOperationsProto";
+option java_package = "games.galactica.services.api";
+option objc_class_prefix = "LAPI";
+
+import "google/protobuf/timestamp.proto";
+
+message OrdersHistoryRequest {
+  // order type: charge, entry_fee, prize, transfer
+  optional string type = 2;
+  repeated string types = 9;
+
+  // Order status
+  // Possible values:
+  // - pending: just created order
+  // - awaiting: checkout linq created, it is awaiting payment from user
+  // - processing: order handling by services to validate payment internally
+  // - accepted: order was paid and it transaction was applied
+  // - declined: order was declined by payment provides due any kind of error
+  // - completed: order completed and its status may be used as final
+  // - cancelled: order was canceled by user
+  // - terminated: order was canceled by system
+  optional string status = 3;
+  repeated string statuses = 10;
+
+  // Orders after start_date
+  optional google.protobuf.Timestamp start_date = 4;
+
+  // Orders before end_date
+  optional google.protobuf.Timestamp end_date = 5;
+
+  // Response items limit
+  optional uint32 limit = 6;
+
+  // Pagination, start from next_id returned in previous response
+  optional string next_id = 7;
+
+  // do not use, has no effect
+  repeated string assets = 8;
+}
+
+message OrdersHistory {
+  repeated HistoryEntry entries = 1;
+
+  // Total number of orders
+  uint32 total = 2;
+
+  // Pagination, next order id if present
+  optional string next_id = 3;
+}
+
+message HistoryEntry {
+  // Order identifier, uuid string
+  string id = 1;
+
+  // Order status
+  // Possible values:
+  // - pending: just created order
+  // - awaiting: checkout linq created, it is awaiting payment from user
+  // - processing: order handling by services to validate payment internally
+  // - accepted: order was paid and it transaction was applied
+  // - declined: order was declined by payment provides due any kind of error
+  // - completed: order completed and its status may be used as final
+  // - cancelled: order was canceled by user
+  // - terminated: order was canceled by system
+  string status = 2;
+
+  // order type: charge, entry_fee, prize, transfer
+  string type = 3;
+
+  // Amount in the order
+  uint32 amount = 4;
+
+  // Order last status change
+  google.protobuf.Timestamp updated_at = 5;
+
+  // Order app id
+  string app_label = 6;
+
+  // Order app name
+  string app = 7;
+
+  // Order money in or out
+  // charge, prize = true
+  // entry_fee = false
+  // transfer:
+  // - to current app = true
+  // - from current app = false
+  bool is_incoming = 8;
+
+  // Name of the app from which transfer occurs
+  optional string transfer_source_app = 9;
+
+  // Name of the app to which transfer occurs
+  optional string transfer_destination_app = 10;
+
+  // Real money currency
+  string currency = 11;
+
+  // Reference data that was placed into the order during the creation
+  // In current version it will return idempotency_key if reference is not set
+  string reference = 12;
+}
+
+service OperationsService {
+  // returns list of orders created by user
+  rpc GetOrdersHistory(OrdersHistoryRequest) returns (OrdersHistory) {};
+}

@@ -1,0 +1,69 @@
+generated: '2026-07-19'
+method: searched
+source: probe of /.well-known/* on every LinQ host
+description: >-
+  No /.well-known/ discovery documents are published on any LinQ or Galactica
+  Games host. Recorded so the probe is auditable and not repeated. Empty is a
+  valid result — no apis.yml WellKnown or SecurityTxt pointer is wired because
+  no document was found.
+hosts:
+- host: https://linq.gg
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+- host: https://docs.linq.gg
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+- host: https://galactica.games
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+- host: https://services.galactica.games
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+notes:
+- LinQ uses opaque bearer tokens issued by its own AuthGameService / AuthUserService
+  rather than OAuth 2.0 or OpenID Connect, so the absence of openid-configuration
+  and oauth-authorization-server is expected rather than a gap.

@@ -1,0 +1,158 @@
+generated: '2026-07-19'
+method: derived
+status: candidate
+source: grpc/linqgg-services.yml
+description: >-
+  LinQ publishes no hosted or remote MCP server. Searched the developer docs,
+  the linqgg GitHub organization (3 repos: docs, .github, unity-sdk), npm and the
+  Buf Schema Registry module — no MCP manifest exists. This is a CANDIDATE tool
+  map derived one-to-one from the published gRPC methods, provided so an MCP
+  server could be forged against the real contract. Nothing here is deployed.
+server:
+  name: linqgg
+  transport: stdio
+  url: null
+  published: false
+upstream:
+  protocol: grpc
+  hosts:
+    production: services.galactica.games
+    stage: services.stage.galactica.games
+  auth: bearer token in gRPC `authorization` metadata (see authentication/linqgg-authentication.yml)
+tools:
+- name: check_access_by_ip
+  description: Check whether app access is allowed from the caller's IP-resolved location.
+  source_operation: grpc/linq/geo/restrictions/v2/restrictions.proto#linq.geo.restrictions.v2.RestrictionsService.IsAccessAllowed
+  auth_required: false
+  read_only: true
+- name: check_operation_allowed
+  description: Check whether a depositing or withdrawal operation is allowed at the
+    user's device coordinates.
+  source_operation: grpc/linq/geo/operations/v1/operations.proto#linq.geo.operations.v1.LocationService.IsOperationAllowed
+  read_only: true
+- name: sign_in_game
+  description: Register a game user in the wallet system with the game secret key
+    and return an Access Token.
+  source_operation: grpc/linq/auth/game/v1/game.proto#linq.auth.game.v1.AuthGameService.SignInGame
+  read_only: false
+  sensitive: true
+- name: sign_up_game_user
+  description: Mint a temporary user token to hand to the LinQ app to begin wallet
+    account linking.
+  source_operation: grpc/linq/auth/user/v1/user.proto#linq.auth.user.v1.AuthUserService.SignUpGameUser
+  read_only: false
+- name: sign_in_game_user
+  description: Exchange a confirmed user token for a Wallet Token linked to a real
+    wallet account.
+  source_operation: grpc/linq/auth/user/v1/user.proto#linq.auth.user.v1.AuthUserService.SignInGameUser
+  read_only: false
+  sensitive: true
+- name: save_game_user
+  description: Save user data onto an anonymous profile to lift money operation limits.
+  source_operation: grpc/linq/auth/user/v1/user.proto#linq.auth.user.v1.AuthUserService.SaveGameUser
+  read_only: false
+- name: get_all_accounts
+  description: List the user's accounts and balances (wallet plus the calling game).
+  source_operation: grpc/linq/money/accounts/v1/accounts.proto#linq.money.accounts.v1.AccountsService.GetAllAccounts
+  read_only: true
+- name: get_actual_balance
+  description: Get the balance for one internal currency code.
+  source_operation: grpc/linq/money/accounts/v1/accounts.proto#linq.money.accounts.v1.AccountsService.GetActualBalance
+  read_only: true
+- name: get_actual_balances
+  description: List accounts with current and available balances (v2).
+  source_operation: grpc/linq/money/accounts/v2/accounts.proto#linq.money.accounts.v2.AccountsService.GetActualBalances
+  read_only: true
+- name: put_money
+  description: Credit the user's game account, e.g. a tournament reward. Requires
+    an idempotency key.
+  source_operation: grpc/linq/money/accounts/v1/accounts.proto#linq.money.accounts.v1.AccountsService.PutMoney
+  read_only: false
+  moves_money: true
+  idempotency_key: idempotency_key
+- name: get_money
+  description: Debit the user's game account, e.g. a tournament entry fee. Requires
+    an idempotency key.
+  source_operation: grpc/linq/money/accounts/v1/accounts.proto#linq.money.accounts.v1.AccountsService.GetMoney
+  read_only: false
+  moves_money: true
+  idempotency_key: idempotency_key
+- name: apply_custom_reward
+  description: Apply a custom reward to the user's account, where permitted.
+  source_operation: grpc/linq/money/accounts/v2/accounts.proto#linq.money.accounts.v2.AccountsService.ApplyCustomReward
+  read_only: false
+  moves_money: true
+- name: new_replenish_order
+  description: Create a replenishment order and return a hosted checkout link.
+  source_operation: grpc/linq/money/payments/v1/payments.proto#linq.money.payments.v1.PaymentsService.NewReplenishOrder
+  read_only: false
+  moves_money: true
+- name: new_transfer_order
+  description: Transfer funds between the wallet account and a game account.
+  source_operation: grpc/linq/money/payments/v1/payments.proto#linq.money.payments.v1.PaymentsService.NewTransferOrder
+  read_only: false
+  moves_money: true
+  idempotency_key: idempotency_key
+- name: get_order_status
+  description: Read the current status of an order.
+  source_operation: grpc/linq/money/payments/v1/payments.proto#linq.money.payments.v1.PaymentsService.GetOrderStatus
+  read_only: true
+- name: get_payment_profile
+  description: Get the player's resolved payment currency and country.
+  source_operation: grpc/linq/money/payments/v1/payments.proto#linq.money.payments.v1.PaymentsService.GetPaymentProfile
+  read_only: true
+- name: is_limit_reached
+  description: Check whether a depositing or withdrawal limit has been reached, and
+    how much remains.
+  source_operation: grpc/linq/money/payments/v1/payments.proto#linq.money.payments.v1.PaymentsService.IsLimitReached
+  read_only: true
+- name: create_pix_order
+  description: Create a Brazil Pix replenishment order and return the Pix code.
+  source_operation: grpc/linq/money/payments/v1/payments.proto#linq.money.payments.v1.PaymentsService.CreatePixOrder
+  read_only: false
+  moves_money: true
+- name: get_orders_history
+  description: List the user's orders, filterable by type, status and date range,
+    with cursor pagination.
+  source_operation: grpc/linq/money/operations/v1/operations.proto#linq.money.operations.v1.OperationsService.GetOrdersHistory
+  read_only: true
+- name: get_apple_pay_config
+  description: Get the Apple Pay merchant configuration for an order.
+  source_operation: grpc/linq/money/payments/v1/native.proto#linq.money.payments.v1.NativePaymentsService.GetApplePayConfig
+  read_only: true
+- name: get_card_payment_config
+  description: Get the TokenEx and Kount configuration for native card entry.
+  source_operation: grpc/linq/money/payments/v1/native.proto#linq.money.payments.v1.NativePaymentsService.GetCardPaymentConfig
+  read_only: true
+- name: get_saved_card_payment_config
+  description: Get the config needed to pay an order with a previously saved card.
+  source_operation: grpc/linq/money/payments/v1/native.proto#linq.money.payments.v1.NativePaymentsService.GetSavedCardPaymentConfig
+  read_only: true
+- name: get_payment_sources
+  description: List the user's saved cards and payment sources.
+  source_operation: grpc/linq/money/payments/v1/native.proto#linq.money.payments.v1.NativePaymentsService.GetPaymentSources
+  read_only: true
+- name: make_payment
+  description: Settle an order with Apple Pay, a tokenized card or a saved card.
+  source_operation: grpc/linq/money/payments/v1/native.proto#linq.money.payments.v1.NativePaymentsService.MakePayment
+  read_only: false
+  moves_money: true
+  sensitive: true
+excluded_from_tool_surface:
+- reason: sandbox-only; not implemented in production
+  operations:
+  - linq.sandbox.helpers.v1.HelpersService.VerifyPlayerToken
+  - linq.sandbox.helpers.v1.HelpersService.UpdateOrder
+- reason: deprecated in the published contract
+  operations:
+  - linq.geo.restrictions.v1.RestrictionsService.isAccessAllowed
+  - linq.geo.restrictions.v1.ConfigurationService.getAvoidedRegions
+agent_safety_notes:
+- Eleven of these tools move real money. Any MCP deployment should require explicit
+  human confirmation for tools flagged moves_money, and must supply a caller-stable
+  idempotency_key on put_money, get_money and new_transfer_order so a retried tool
+  call cannot double-spend.
+- Amounts are integers in coins and must be divided by 100 for display. An agent
+  reading a balance of 500 must report $5.00, not $500.
+- Money operations are geo-gated. check_access_by_ip and check_operation_allowed
+  should be called before any moves_money tool.

@@ -1,0 +1,60 @@
+generated: '2026-07-19'
+method: generated
+source: grpc/linqgg-services.yml
+description: >-
+  Packaged Agent Skills for the marquee LinQ Wallet flows. LinQ publishes no
+  AGENTS.md or agent skills of its own (searched docs.linq.gg, the linqgg GitHub
+  organization and the Buf registry module). These are generated from the
+  published protobuf contract plus the developer documentation; every operation
+  named in the frontmatter is a real service method verified against
+  buf.build/linq/linq commit 26e57c30eca0422ebe90cfcd1c4b015d.
+api: LinQ Wallet Public API
+skills:
+- name: linqgg-onboard-player
+  file: skills/linqgg-onboard-player.md
+  summary: >-
+    Register a player anonymously with SignInGame, then link them to a real
+    wallet account via SignUpGameUser / SignInGameUser, deep link or Keychain.
+  operations:
+  - linq.geo.restrictions.v2.RestrictionsService.IsAccessAllowed
+  - linq.auth.game.v1.AuthGameService.SignInGame
+  - linq.auth.user.v1.AuthUserService.SignUpGameUser
+  - linq.auth.user.v1.AuthUserService.SignInGameUser
+  - linq.auth.user.v1.AuthUserService.SaveGameUser
+  - linq.money.accounts.v1.AccountsService.GetActualBalance
+- name: linqgg-top-up-balance
+  file: skills/linqgg-top-up-balance.md
+  summary: >-
+    Create a replenishment order and settle it by hosted checkout, native card,
+    Apple Pay, saved card or Brazil Pix, then confirm with GetOrderStatus.
+  operations:
+  - linq.geo.operations.v1.LocationService.IsOperationAllowed
+  - linq.money.payments.v1.PaymentsService.IsLimitReached
+  - linq.money.payments.v1.PaymentsService.GetPaymentProfile
+  - linq.money.payments.v1.PaymentsService.NewReplenishOrder
+  - linq.money.payments.v1.PaymentsService.CreatePixOrder
+  - linq.money.payments.v1.PaymentsService.GetOrderStatus
+  - linq.money.payments.v1.NativePaymentsService.GetCardPaymentConfig
+  - linq.money.payments.v1.NativePaymentsService.GetApplePayConfig
+  - linq.money.payments.v1.NativePaymentsService.GetPaymentSources
+  - linq.money.payments.v1.NativePaymentsService.MakePayment
+- name: linqgg-run-tournament-economy
+  file: skills/linqgg-run-tournament-economy.md
+  summary: >-
+    Debit entry fees with GetMoney and credit prizes with PutMoney using
+    deterministic idempotency keys, then reconcile via GetOrdersHistory.
+  operations:
+  - linq.money.accounts.v1.AccountsService.GetActualBalance
+  - linq.money.accounts.v1.AccountsService.GetAllAccounts
+  - linq.money.accounts.v2.AccountsService.GetActualBalances
+  - linq.money.accounts.v1.AccountsService.GetMoney
+  - linq.money.accounts.v1.AccountsService.PutMoney
+  - linq.money.accounts.v2.AccountsService.ApplyCustomReward
+  - linq.money.operations.v1.OperationsService.GetOrdersHistory
+shared_rules:
+- Amounts are integers in coins; divide by 100 before display.
+- idempotency_key is a request-message field, not a header, and is required on
+  PutMoney and GetMoney.
+- Money operations are geo-gated; check IsAccessAllowed and IsOperationAllowed first.
+- There is no event or webhook surface; asynchronous outcomes are polled.
+- Never route raw card data through a game backend.

@@ -1,0 +1,100 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.money.accounts.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Requests information about current user balance
+message GetBalanceRequest {
+  // Internal currency code
+  // If not specified, by default it returns balance for LNQ currency
+  optional string currency = 1;
+}
+
+// Returns detailed information about user balance on the requested account
+message GetBalanceResponse {
+
+  // number of internal account
+  string number = 1;
+
+  // Internal currency 3-letters code
+  // LNQ for wallet balance, for example
+  string currency = 2;
+
+  // Current balance of the user in coins
+  // It means, that real balance should be devided by 100
+  // before displaying to the user
+  uint32 balance = 3;
+}
+
+// List of active assets accounts for the current user
+message AccountsResponse {
+  // Returns list of accounts, limited by user access
+  // For the game request only LinQ and this game accounts will be returned
+  repeated GetBalanceResponse accounts = 1;
+}
+
+// Amount of money to deposit/withdrawal
+message MoneyRequest {
+
+  // Unique key for idempotency
+  string idempotency_key = 1;
+
+  // Amount of money to take or give without a fee
+  uint32 amount = 2;
+
+  // Fee value if applicable
+  optional uint32 fee = 3;
+
+  // Some string data to describe money transaction
+  // e.g. Entry fee for super tournament
+  optional string reason = 4;
+
+  // Some JSON string for correlation data
+  // e.g. {"tournament_id":123}
+  optional string extra = 5;
+
+  // Reference data that will be placed into the order
+  optional string reference = 6;
+}
+
+// Returns order id and account data
+message MoneyResponse {
+
+  // Order identifier, uuid string
+  string id = 1;
+
+  // Order status
+  // Possible values:
+  // - completed: order completed and its status may be used
+  //   as final for futher decisions
+  string status = 2;
+
+  // Amount in the order
+  uint32 amount = 3;
+
+  // see GetBalanceResponse
+  GetBalanceResponse account = 4;
+
+  // Reference data that was placed into the order during the creation
+  string reference = 5;
+}
+
+// Service allows to get access to data related to
+// the user accounts in the internal wallet systems
+service AccountsService {
+  // Return list of available user accounts with its balances
+  // To get full list, do not provide currency parameter
+  rpc GetAllAccounts(GetBalanceRequest) returns (AccountsResponse) {};
+
+  // Returns actual balance for a requested internal currency
+  rpc GetActualBalance(GetBalanceRequest) returns (GetBalanceResponse) {};
+
+  // Deposits money to account accorignly to the currency
+  rpc PutMoney(MoneyRequest) returns (MoneyResponse) {};
+
+  // Withdraws money from account accordingly to the currency
+  rpc GetMoney(MoneyRequest) returns (MoneyResponse) {};
+}

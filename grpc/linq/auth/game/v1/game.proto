@@ -1,0 +1,39 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.auth.game.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "AuthGameProto";
+option java_package = "games.galactica.services.api";
+option objc_class_prefix = "LAPI";
+
+// Request data for registering in the services as a game user
+message SignInGameRequest {
+
+  // Dedicated special token for linking game services and wallet services.
+  // It is needed for establishing the initial handshake between services and
+  // before user obtained their's own access token.
+  string game_token = 1;
+
+  // Internal game user identifier used for linking it with profile on wallet side.
+  // Prefered to use value that can not be changed in the future.
+  //
+  // Good example: incremental ID, UUID value, eny kind of unique value
+  // Bad example: username, email or any kind of information which users can update by themself.
+  string game_user_id = 2;
+}
+
+// Response with generated access token for a given user.
+message SignInGameResponse {
+  // Access token for getting access to protected API endpoints, which requires user authorisation.
+  string access_token = 1;
+}
+
+// Service allows to make the first login in the wallet services for a game requests.
+service AuthGameService {
+  // Using special server token it register game user in the wallet system
+  // It also creates internal account with defined for agame special currency code.
+  rpc SignInGame(SignInGameRequest) returns (SignInGameResponse) {}
+}

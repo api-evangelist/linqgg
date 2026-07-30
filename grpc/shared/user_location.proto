@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package linq.shared;
+
+// Determined user location
+message UserLocationData {
+  // Country code, two letter by ISO
+  string country = 1;
+  // Country region code
+  string region = 2;
+  // Name of place or location, like a town or city
+  string city = 3;
+}

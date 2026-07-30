@@ -1,0 +1,86 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.geo.restrictions.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "GeoRestrictionsProto";
+option java_package = "games.galactica.services.api";
+option objc_class_prefix = "LAPI";
+
+option deprecated = true;
+
+// Access request payload, optionally receives app code
+// To check access for a specific application
+message AccessAppRequest {
+  optional string app = 1;
+}
+
+// Determined user location
+message UserLocationData {
+  // Country code, two letter by ISO
+  string country = 1;
+  // Country region code
+  string region = 2;
+  // Name of place or location, like a town or city
+  string city = 3;
+}
+
+// Access details message with included user location data
+message AccessStatus {
+  bool allowed = 1;
+  UserLocationData location = 2;
+}
+
+// Special service for detecting user location
+// by network and manage restrictions
+service RestrictionsService {
+
+  option deprecated = true;
+
+  // returns is access allowed and detected locations details
+  rpc isAccessAllowed(AccessAppRequest) returns (AccessStatus) {
+    option deprecated = true;
+  }
+
+}
+
+// Request for asking current avoided regions settings
+message RegionsConfigRequest {
+  // Game token used for authorization requests
+  // Same as for AuthGameService::SignInGame
+  string token = 1;
+}
+
+// List of areas attached to the country
+message Areas {
+  // Country two-letter code
+  string country = 1;
+  // List of two-letter codes of regions
+  repeated string regions = 2;
+}
+
+// Reponse with avoided areas configuration
+message AvoidedRegionsResponse {
+  // List of avoided countries
+  repeated string countries = 1;
+  // List of avoided areas mapped by country
+  repeated Areas areas = 2;
+}
+
+// Service which provides configuration options related to geo restrictions
+service ConfigurationService {
+
+  option deprecated = true;
+
+  // Returns list of avoided countries and regions
+  // It returns separated list of blocked countries,
+  // and additionally list of specific regions inside country
+  // So it is possible that country is allowed,
+  // but some its regions are restricted.
+  rpc getAvoidedRegions(RegionsConfigRequest) returns (AvoidedRegionsResponse) {
+    option deprecated = true;
+  }
+
+}

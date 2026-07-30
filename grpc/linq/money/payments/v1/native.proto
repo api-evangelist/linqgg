@@ -1,0 +1,232 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.money.payments.v1;
+
+import "shared/billing_address.proto";
+
+// Fields for apple pay payment request
+message ApplePayConfig {
+  // Merchant ID
+  string merchant_id = 1;
+  // Merchant two-letter ISO 3166 country code
+  string country_code = 2;
+  // The payment networks the merchant supports.
+  repeated string supported_networks = 3;
+  // The payment capabilities that the merchant supports
+  repeated string merchant_capabilities = 4;
+  // Field names for requesting contact information in a payment request
+  repeated string required_billing_contact_fields = 5;
+  // Description of the line item.
+  string line_item_label = 6;
+  // Amount of the payment
+  int32 order_amount = 7;
+  // Code of the currency used in payment transaction
+  string order_currency = 8;
+}
+
+// Fields for TokenEx request
+message TokenexConfig {
+  // TokenEx url for POST request
+  string url = 1;
+  // TokenEx id used for request
+  string tokenex_id = 2;
+  // Timestamp string used for request
+  string timestamp = 3;
+  // Auth key used for request
+  string authentication_key = 4;
+  // Token scheme used for request
+  string token_scheme = 5;
+}
+
+// Fields for Kount DDC
+message KountConfig {
+  // Flag indicating is it production environment
+  bool is_prod = 1;
+  // Client ID for DDC, Kount is disabled if not specified
+  optional string client_id = 2;
+}
+
+// Data for native card payment
+message CardPaymentConfig {
+  // Tokenex config
+  TokenexConfig tokenex_config = 1;
+  // Kount config
+  KountConfig kount_config = 2;
+}
+
+// Apple pay payment request description
+message ApplePayPayment {
+  // JSON payment data from apple pay sdk
+  string payment_data = 1;
+}
+
+// Data from Kount DDC for card payment
+message KountData {
+  // Session ID value got from Kount DDC
+  string session_id = 1;
+  // First six card number digits
+  optional string first_six = 2;
+  // Last four card number digits
+  optional string last_four = 3;
+  // Device user-agent
+  optional string user_agent = 4;
+}
+
+// Card tokenex payment request description
+message CardTokenexPayment {
+  // TokenEx token got from TokenEx tokenization response
+  string token = 1;
+  // TokenEx token HMAC from TokenEx tokenization response
+  string token_hmac = 2;
+  // 2 or 4-digit card expiration year
+  string exp_year = 3;
+  // 2-digit card expiration month
+  string exp_month = 4;
+  // Card Holder name
+  string card_holder_name = 5;
+  // Kount data from Kount DDC (can be skipped only if Kount disabled)
+  optional KountData kount_data = 6;
+}
+
+// Payment with previously saved card
+message SavedCardPayment {
+  // Saved card identifier
+  string saved_card_id = 1;
+  // TokenEx token HMAC from TokenEx tokenization response
+  string token_hmac = 2;
+  // Kount data from Kount DDC (can be skipped only if Kount disabled)
+  optional KountData kount_data = 3;
+}
+
+// Saved card config request
+message SavedCardPaymentConfigRequest {
+  // Order id
+  string order_id = 1;
+  // Saved card id
+  string saved_card_id = 2;
+}
+
+// Data for saved card payment
+message SavedCardPaymentConfig {
+  // Card token used for tokenex request
+  string token = 1;
+  // Tokenex config
+  TokenexConfig tokenex_config = 2;
+  // Kount config
+  KountConfig kount_config = 3;
+}
+
+// Order config request
+message OrderConfigRequest {
+  // Order id
+  string order_id = 1;
+}
+
+// Payment request
+message PaymentRequest {
+  // Order id
+  string order_id = 1;
+  // Billing address data
+  optional shared.BillingAddress address = 2;
+  // Apple pay data
+  optional ApplePayPayment apple_pay_payment = 3;
+  // Card TokenEx data
+  optional CardTokenexPayment card_tokenex_payment = 4;
+  // Saved card payment
+  optional SavedCardPayment saved_card_payment = 5;
+}
+
+// Information about order
+message OrderResponse {
+  // Order identifier, uuid string
+  string id = 1;
+
+  // Order status
+  // Possible values:
+  // - pending: just created order
+  // - awaiting: checkout linq created, it is awaiting payment from user
+  // - processing: order handling by services to validate payment internally
+  // - accepted: order was paid and it transaction was applied
+  // - declined: order was declined by payment provides due any kind of error
+  // - completed: order completed and its status may be used as final
+  // - cancelled: order was canceled by user
+  // - terminated: order was canceled by system
+  string status = 2;
+
+  // Amount in the order
+  uint32 amount = 3;
+
+  // Reference data that was placed into the order during the creation
+  string reference = 4;
+}
+
+// Payment response
+message PaymentResponse {
+  // If payment was successfull
+  bool success = 1;
+  // Information about order
+  OrderResponse order = 2;
+  // Order id for recommended retry (for applepay)
+  optional string retry_order_id = 3;
+  // Script for 3ds check that should be opened in webview
+  optional string script_3ds = 4;
+}
+
+// Pix (brazilian payment system) request
+message PixPaymentRequest {
+  // Order id
+  string order_id = 1;
+  // Pix tax id (CPF)
+  optional string tax_id = 2;
+  // Billing address
+  optional shared.BillingAddress address = 3;
+}
+
+// Pix (brazilian payment system) config
+message PixPaymentResponse {
+  // Pix code
+  string code = 1;
+}
+
+enum PaymentSourceType {
+  // Credic card
+  CARD = 0;
+  // Brazilian tax id (CPF number)
+  BRAZIL_TAX_ID = 1;
+}
+
+message PaymentSource {
+  // Unique id for payment source
+  string id = 1;
+  // Type of payment source
+  PaymentSourceType type = 2;
+  // Value to display on UI
+  string value = 3;
+  // Billing address
+  optional shared.BillingAddress address = 4;
+}
+
+// Payment sources - cards, tokens
+message PaymentSourcesResponse {
+  repeated PaymentSource payment_sources = 1;
+}
+
+// Payments service allows to perform mobile native payments
+service NativePaymentsService {
+  // Apple pay config for order
+  rpc GetApplePayConfig(OrderConfigRequest) returns (ApplePayConfig) {};
+
+  // Card payment config
+  rpc GetCardPaymentConfig(OrderConfigRequest) returns (CardPaymentConfig) {};
+
+  // Saved card payment config
+  rpc GetSavedCardPaymentConfig(SavedCardPaymentConfigRequest) returns (SavedCardPaymentConfig) {};
+
+  // Native payment
+  rpc MakePayment(PaymentRequest) returns (PaymentResponse) {};
+
+  // Get payment sources
+  rpc GetPaymentSources(OrderConfigRequest) returns (PaymentSourcesResponse) {};
+}

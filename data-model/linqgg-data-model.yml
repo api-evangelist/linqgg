@@ -1,0 +1,242 @@
+generated: '2026-07-19'
+method: derived
+source: grpc/linqgg-services.yml
+docs: https://docs.linq.gg/modules/money
+description: >-
+  Entity graph derived from the protobuf messages published at
+  buf.build/linq/linq. LinQ publishes no object reference page, so entity
+  boundaries are inferred from message shapes and the id-reference fields that
+  link them. Identifiers are plain UUID strings with no type prefixes.
+identifiers:
+  order_id:
+    type: uuid string
+    prefix: none
+    fields:
+    - OrderStatusResponse.id
+    - OrderResponse.id
+    - MoneyResponse.id
+    - AppliedRewardOrder.id
+    - HistoryEntry.id
+    - OrderConfigRequest.order_id
+    - PaymentRequest.order_id
+    - PixPaymentRequest.order_id
+  user_id:
+    type: int32
+    fields:
+    - SignInGameUserResponse.id
+  game_user_id:
+    type: string, supplied by the game
+    guidance: >-
+      "Prefered to use value that can not be changed in the future. Good example:
+      incremental ID, UUID value... Bad example: username, email."
+  account_number:
+    type: string
+    fields:
+    - GetBalanceResponse.number
+    - AccountBalance.number
+  currency_code:
+    type: 3-letter internal code
+    role: doubles as the account selector — LNQ for the wallet, a per-game code for the game account
+  saved_card_id:
+    type: string
+    fields:
+    - SavedCardPayment.saved_card_id
+    - SavedCardPaymentConfigRequest.saved_card_id
+  payment_source_id:
+    type: string
+    fields:
+    - PaymentSource.id
+entities:
+- name: User
+  aka: Player
+  description: >-
+    A LinQ wallet identity. Starts conditionally anonymous, created from the
+    game's own user id, and is upgraded to a linked wallet account after the user
+    authorizes in the LinQ app.
+  messages:
+  - linq.auth.user.v1.UserData
+  - linq.auth.user.v1.SignInGameUserResponse
+  fields:
+  - phone
+  - email
+  - first_name
+  - last_name
+  - dob
+  relationships:
+  - has_many: Account
+    via: implicit, scoped by access token
+  - has_many: Order
+    via: implicit, scoped by access token
+- name: Account
+  description: >-
+    An internal balance holding one currency. A user holds a wallet account (LNQ)
+    plus one account per game they play; only the wallet account and the calling
+    game's account are ever returned.
+  messages:
+  - linq.money.accounts.v1.GetBalanceResponse
+  - linq.money.accounts.v2.AccountBalance
+  - linq.money.accounts.v2.Balance
+  fields:
+  - number
+  - currency
+  - balance (v1 uint32 coins; v2 Balance{current, available})
+  relationships:
+  - belongs_to: User
+    via: access token
+  - has_many: Order
+    via: MoneyResponse.account
+- name: Order
+  description: >-
+    The unit of intent for every money movement — replenishment, transfer, entry
+    fee, prize or custom reward. Progresses through a published status machine.
+  messages:
+  - linq.money.payments.v1.OrderStatusResponse
+  - linq.money.payments.v1.OrderResponse
+  - linq.money.accounts.v1.MoneyResponse
+  - linq.money.accounts.v2.AppliedRewardOrder
+  fields:
+  - id
+  - status
+  - amount
+  - reference
+  - checkout (replenish orders only)
+  types:
+  - charge
+  - entry_fee
+  - prize
+  - transfer
+  statuses:
+  - pending
+  - awaiting
+  - processing
+  - accepted
+  - declined
+  - completed
+  - cancelled
+  - terminated
+  relationships:
+  - has_one: Account
+    via: MoneyResponse.account
+  - has_one: Payment
+    via: PaymentRequest.order_id
+  - has_one: HistoryEntry
+    via: HistoryEntry.id
+- name: HistoryEntry
+  description: >-
+    A denormalized, app-attributed projection of an order for reconciliation and
+    player-facing transaction lists.
+  messages:
+  - linq.money.operations.v1.HistoryEntry
+  fields:
+  - id
+  - status
+  - type
+  - amount
+  - updated_at
+  - app
+  - app_label
+  - is_incoming
+  - transfer_source_app
+  - transfer_destination_app
+  - currency
+  - reference
+  relationships:
+  - belongs_to: Order
+    via: id
+- name: Payment
+  description: >-
+    An attempt to settle an order against a payment instrument — Apple Pay, a
+    TokenEx-tokenized card, a saved card or Pix.
+  messages:
+  - linq.money.payments.v1.PaymentRequest
+  - linq.money.payments.v1.PaymentResponse
+  relationships:
+  - belongs_to: Order
+    via: order_id
+  - has_one: BillingAddress
+    via: PaymentRequest.address
+  - has_one: PaymentSource
+    via: SavedCardPayment.saved_card_id
+- name: PaymentSource
+  description: A stored payment instrument — a card or a Brazilian tax id (CPF).
+  messages:
+  - linq.money.payments.v1.PaymentSource
+  fields:
+  - id
+  - type (CARD | BRAZIL_TAX_ID)
+  - value
+  relationships:
+  - belongs_to: User
+    via: access token
+  - has_one: BillingAddress
+    via: address
+- name: PaymentProfile
+  description: >-
+    Resolved payment context for a player — the real-money currency and country
+    that apply, derived in part from their App Store country.
+  messages:
+  - linq.money.payments.v1.PaymentProfileResponse
+  fields:
+  - currency
+  - country
+  - identifier
+  relationships:
+  - belongs_to: User
+    via: access token
+- name: BillingAddress
+  description: Shared address value type used by card, Pix and payment-source records.
+  messages:
+  - linq.shared.BillingAddress
+  fields:
+  - country
+  - region
+  - city
+  - street
+  - zip
+  required_subset:
+  - country
+  - region (US only)
+  - zip
+- name: UserLocation
+  description: >-
+    Resolved geographic position, by IP or by device coordinates, used to gate
+    app access and individual money operations.
+  messages:
+  - linq.shared.UserLocationData
+  - linq.geo.operations.v1.UserLocation
+  - linq.geo.operations.v1.Coordinates
+  fields:
+  - country
+  - region
+  - city
+  relationships:
+  - has_one: Access
+    via: Access.location
+- name: OperationLimit
+  description: Monetary ceiling on a depositing or withdrawal operation for the current profile.
+  messages:
+  - linq.money.payments.v1.OperationLimitResponse
+  fields:
+  - is_reached
+  - remains
+  - limit
+  relationships:
+  - belongs_to: User
+    via: access token
+value_flow:
+  description: >-
+    Money enters through a replenishment order settled by card, Apple Pay or Pix,
+    landing on the player's game account. It moves between the wallet account
+    (LNQ) and the game account through transfer orders. In-game it is debited as
+    an entry fee and credited as a prize or custom reward through PutMoney /
+    GetMoney / ApplyCustomReward. It leaves by transferring to the wallet account
+    and withdrawing to a bank account or card in the LinQ app.
+  sequence:
+  - PaymentsService.NewReplenishOrder
+  - NativePaymentsService.MakePayment or hosted checkout link
+  - PaymentsService.GetOrderStatus
+  - AccountsService.GetMoney (entry fee)
+  - AccountsService.PutMoney (prize)
+  - PaymentsService.NewTransferOrder (game account to wallet)
+render:
+  subway: not present

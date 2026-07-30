@@ -1,0 +1,140 @@
+generated: '2026-07-19'
+method: searched
+source: https://docs.linq.gg/modules/money
+derived_from: grpc/linqgg-services.yml
+description: >-
+  Cross-cutting runtime semantics of the LinQ Wallet Public API — a gRPC /
+  protobuf surface, so several conventions that would be HTTP headers elsewhere
+  are request message fields here.
+transport:
+  protocol: grpc
+  encoding: protobuf (proto3)
+  tls: required in stage and production; insecure channel credentials only for localhost
+  environments:
+    production: services.galactica.games
+    stage: services.stage.galactica.games
+auth:
+  style: opaque bearer token in gRPC `authorization` metadata
+  detail: authentication/linqgg-authentication.yml
+idempotency:
+  supported: true
+  mechanism: request-message field, not a header
+  field: idempotency_key
+  operations:
+  - linq.money.accounts.v1.AccountsService.PutMoney
+  - linq.money.accounts.v1.AccountsService.GetMoney
+  - linq.money.payments.v1.PaymentsService.NewTransferOrder
+  required_on:
+  - PutMoney
+  - GetMoney
+  optional_on:
+  - NewTransferOrder
+  replay_semantics: >-
+    Orders are deduplicated. The PaymentsService.NewReplenishOrder contract states
+    that "in case order was not processed a new request will return already
+    existing order with the same ID", so a retry returns the original order rather
+    than creating a duplicate.
+  retention: not published
+  correlation: >-
+    When `reference` is not set, HistoryEntry.reference falls back to returning the
+    idempotency_key, so the idempotency key doubles as a reconciliation handle in
+    OperationsService.GetOrdersHistory.
+  example: "putMoney({ idempotencyKey: 'ik-123', amount: 500, reason: 'Tournament reward' })"
+pagination:
+  style: cursor
+  operations:
+  - linq.money.operations.v1.OperationsService.GetOrdersHistory
+  request_fields:
+    limit: uint32, response items limit
+    next_id: string, start from the next_id returned in the previous response
+  response_fields:
+    entries: repeated HistoryEntry
+    total: uint32, total number of orders
+    next_id: optional string, next order id if present
+  filtering:
+    type: single order type — charge, entry_fee, prize, transfer
+    types: repeated order types
+    status: single order status
+    statuses: repeated order statuses
+    start_date: google.protobuf.Timestamp, orders after
+    end_date: google.protobuf.Timestamp, orders before
+  deprecated_filters:
+  - assets (documented in-spec as "do not use, has no effect")
+money_representation:
+  unit: coins
+  rule: values are integers in coins and must be divided by 100 before display
+  example: '$5.00 is sent as 500'
+  currency_codes:
+    format: internal 3-letter codes analogous to ISO 4217
+    wallet: LNQ
+    game: per-game internal currency code (e.g. GSC, GMC)
+    note: >-
+      Balances for games other than the calling game are never returned, for
+      security reasons.
+  real_currency: PaymentProfileResponse.currency is a real ISO 4217 code (USD, GBP, BRL)
+metadata_and_correlation:
+  reference:
+    description: custom reference identifier for external systems, stored on the order
+      and echoed back on every order response and history entry
+    present_on:
+    - MoneyRequest
+    - OrderReplenishRequest
+    - TransferOrderRequest
+    - CustomRewardRequest
+  reason:
+    description: free-text description of a money transaction, e.g. "Entry fee for
+      super tournament"
+  extra:
+    description: JSON string for correlation data, e.g. '{"tournament_id":123}'
+    present_on:
+    - MoneyRequest
+request_tracing:
+  request_id: not published
+  session:
+    description: optional device profiling session id on geo AccessRequest, and
+      KountData.session_id for anti-fraud device data collection
+versioning:
+  style: protobuf package version segment
+  pattern: <domain>.<module>.v<N>
+  current:
+    linq.auth.game: v1
+    linq.auth.user: v1
+    linq.geo.operations: v1
+    linq.geo.restrictions: v2
+    linq.money.accounts: v2
+    linq.money.operations: v1
+    linq.money.payments: v1
+    linq.sandbox.helpers: v1
+  policy: >-
+    Breaking changes ship as a new versioned package alongside the old one; the
+    superseded package is marked `option deprecated = true` in the .proto rather
+    than removed. See lifecycle/linqgg-lifecycle.yml.
+  stability_note: >-
+    The Getting Started page warns that the API Reference is still in progress but
+    states "there are no plans to change the method signatures".
+error_envelope:
+  style: native gRPC status codes and messages — no RFC 9457 problem+json
+  detail: errors/linqgg-error-codes.yml
+  domain_errors: >-
+    Business outcomes are carried in-band on success responses rather than as
+    errors: OrderStatusResponse.status, PaymentResponse.success, Access.allowed and
+    OperationLimitResponse.is_reached.
+rate_limiting:
+  signal: none published
+  related: >-
+    LinQ publishes monetary operation limits rather than request rate limits.
+    PaymentsService.IsLimitReached returns is_reached, remains and limit for a
+    depositing or withdrawal operation. Anonymous profiles are capped at a total
+    deposit amount of 20.00.
+geo_gating:
+  description: >-
+    Money operations are conditioned on location. IsAccessAllowed gates the app by
+    IP; IsOperationAllowed gates individual depositing/withdrawal operations by
+    device coordinates. Callers are expected to check before initiating funds
+    movement.
+cross_references:
+  authentication: authentication/linqgg-authentication.yml
+  errors: errors/linqgg-error-codes.yml
+  lifecycle: lifecycle/linqgg-lifecycle.yml
+  sandbox: sandbox/linqgg-sandbox.yml
+  data_model: data-model/linqgg-data-model.yml

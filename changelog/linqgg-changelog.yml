@@ -1,0 +1,114 @@
+generated: '2026-07-19'
+method: searched
+source: https://github.com/linqgg/unity-sdk/releases
+description: >-
+  LinQ publishes no product or API changelog page. Change history is observable
+  in two machine-readable places: dated commits on the public Buf Schema Registry
+  module (the API contract itself) and GitHub Releases on the Unity SDK, drafted
+  by Release Drafter following Keep a Changelog and Semantic Versioning.
+scheme: semver
+streams:
+- id: api-contract
+  name: LinQ Wallet Public API (protobuf contract)
+  source: https://buf.build/linq/linq
+  versioning: >-
+    Immutable dated commits; no human-readable release notes are published per
+    commit. Package-level versioning (v1, v2) marks breaking revisions.
+  current_commit: 26e57c30eca0422ebe90cfcd1c4b015d
+  current_commit_date: '2025-10-20'
+  observed_commit_count_recent_page: 30
+  recent_commits:
+  - id: 26e57c30eca0422ebe90cfcd1c4b015d
+    date: '2025-10-20'
+  - id: 8d4030cd31144fa09ae23f36aa767bbc
+    date: '2025-10-20'
+  - id: 69bb34b0b1634c9a8de9a7711763add3
+    date: '2024-10-24'
+  - id: 4666834fb8764cc2a612f490382e912f
+    date: '2024-10-04'
+  - id: 0b5666e9fa9943a697dbcc0e81596402
+    date: '2024-09-24'
+- id: unity-sdk
+  name: LinQ Unity SDK
+  source: https://github.com/linqgg/unity-sdk/releases
+  tooling: Release Drafter GitHub Action
+  conventions:
+  - https://keepachangelog.com/en/1.0.0/
+  - https://semver.org/spec/v2.0.0.html
+  current_version: v0.8.3
+  current_version_date: '2024-11-18'
+  entries:
+  - version: v0.8.3
+    date: '2024-11-18'
+    breaking: false
+    highlights:
+    - Update Kount library to a new version that fixes PrivacyInfo notifications
+  - version: v0.8.2
+    date: '2024-09-30'
+    breaking: false
+    highlights:
+    - Remove fallback to USA country in the App Store country locator
+  - version: v0.8.1
+    date: '2024-09-10'
+    breaking: false
+    highlights:
+    - Regenerate services API contracts using the latest remote buf plugins
+  - version: v0.8.0
+    date: '2024-08-22'
+    breaking: false
+    additions:
+    - Keychain mode for cross-app token handoff
+  - version: v0.7.0
+    date: '2024-08-08'
+    breaking: false
+    additions:
+    - New method for getting a Pix payment code for checkout in Brazil
+  - version: v0.6.0
+    date: '2024-08-07'
+    breaking: false
+    additions:
+    - New method for checking access by IP directly from Unity games
+  - version: v0.5.0
+    date: '2024-06-18'
+    breaking: false
+    additions:
+    - 3DS check integrated into the SDK, including related plugins
+  - version: v0.4.3
+    date: '2024-04-23'
+    breaking: false
+    highlights:
+    - Fix usage of the Kount API in Data Collector after Kount updates
+  - version: v0.4.2
+    date: '2024-03-22'
+    breaking: false
+    highlights:
+    - Throw an exception when payment fails using an ordinary credit card
+  - version: v0.4.1
+    date: '2024-03-22'
+    breaking: false
+  - version: v0.4.0
+    date: '2024-03-19'
+    breaking: false
+  - version: v0.3.3
+    date: '2024-03-19'
+    breaking: false
+  - version: v0.3.2
+    date: '2024-03-15'
+    breaking: false
+  - version: v0.3.1
+    date: '2024-03-15'
+    breaking: false
+  - version: v0.3.0
+    date: '2024-03-14'
+    breaking: false
+  - version: v0.2.0
+    date: '2024-02-22'
+    breaking: false
+  - version: v0.1.0
+    date: '2024-02-19'
+    breaking: false
+    highlights:
+    - First public release
+notes:
+- The Unity SDK has not shipped a release since 2024-11-18, while the protobuf
+  contract was last revised 2025-10-20.

@@ -1,0 +1,28 @@
+// Copyright 2024 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.geo.restrictions.v2;
+
+import "google/protobuf/empty.proto";
+import "shared/user_location.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "GeoRestrictionsProto";
+option java_package = "games.galactica.services.api";
+option objc_class_prefix = "LAPI";
+
+// Access details message with included user location data
+message AccessStatus {
+  bool allowed = 1;
+  shared.UserLocationData location = 2;
+}
+
+// Special service for detecting user location
+// by network and manage restrictions
+service RestrictionsService {
+
+  // returns is access allowed and detected locations details
+  rpc IsAccessAllowed(google.protobuf.Empty) returns (AccessStatus) {}
+
+}

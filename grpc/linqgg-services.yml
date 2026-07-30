@@ -1,0 +1,126 @@
+generated: '2026-07-19'
+method: searched
+source: https://buf.build/linq/linq
+description: >-
+  Index of the LinQ Wallet Public API Protocol Buffers surface, downloaded
+  verbatim from the Buf Schema Registry module buf.build/linq/linq. The .proto
+  files under grpc/linq/ and grpc/shared/ are unmodified copies preserving the
+  original import paths.
+module:
+  registry: buf.build
+  name: buf.build/linq/linq
+  commit: 26e57c30eca0422ebe90cfcd1c4b015d
+  commit_created: '2025-10-20T14:49:36Z'
+  license: MIT (Copyright 2023 Galactica Games Inc.)
+  overview: grpc/linqgg-buf-module.md
+transport:
+  protocol: grpc
+  encoding: protobuf
+  syntax: proto3
+  hosts:
+    production: services.galactica.games
+    stage: services.stage.galactica.games
+modules:
+- name: Geo
+  description: Checking the location of a user or device by IP and by coordinates.
+- name: Auth
+  description: Authenticating users in wallet services.
+- name: Money
+  description: Managing money — accounts, balances, orders, transfers, payments.
+- name: Sandbox
+  description: Helpers to make integrations easier. Works only in test mode.
+services:
+- service: AuthGameService
+  package: linq.auth.game.v1
+  file: grpc/linq/auth/game/v1/game.proto
+  methods:
+  - SignInGame
+- service: AuthUserService
+  package: linq.auth.user.v1
+  file: grpc/linq/auth/user/v1/user.proto
+  methods:
+  - SignUpGameUser
+  - SignInGameUser
+  - SaveGameUser
+- service: LocationService
+  package: linq.geo.operations.v1
+  file: grpc/linq/geo/operations/v1/operations.proto
+  methods:
+  - IsOperationAllowed
+- service: RestrictionsService
+  package: linq.geo.restrictions.v1
+  file: grpc/linq/geo/restrictions/v1/restrictions.proto
+  deprecated: true
+  methods:
+  - isAccessAllowed
+- service: ConfigurationService
+  package: linq.geo.restrictions.v1
+  file: grpc/linq/geo/restrictions/v1/restrictions.proto
+  deprecated: true
+  methods:
+  - getAvoidedRegions
+- service: RestrictionsService
+  package: linq.geo.restrictions.v2
+  file: grpc/linq/geo/restrictions/v2/restrictions.proto
+  methods:
+  - IsAccessAllowed
+- service: AccountsService
+  package: linq.money.accounts.v1
+  file: grpc/linq/money/accounts/v1/accounts.proto
+  methods:
+  - GetAllAccounts
+  - GetActualBalance
+  - PutMoney
+  - GetMoney
+- service: AccountsService
+  package: linq.money.accounts.v2
+  file: grpc/linq/money/accounts/v2/accounts.proto
+  methods:
+  - GetActualBalances
+  - ApplyCustomReward
+- service: OperationsService
+  package: linq.money.operations.v1
+  file: grpc/linq/money/operations/v1/operations.proto
+  methods:
+  - GetOrdersHistory
+- service: PaymentsService
+  package: linq.money.payments.v1
+  file: grpc/linq/money/payments/v1/payments.proto
+  methods:
+  - NewReplenishOrder
+  - NewTransferOrder
+  - GetOrderStatus
+  - GetPaymentProfile
+  - IsLimitReached
+  - CreatePixOrder
+- service: NativePaymentsService
+  package: linq.money.payments.v1
+  file: grpc/linq/money/payments/v1/native.proto
+  methods:
+  - GetApplePayConfig
+  - GetCardPaymentConfig
+  - GetSavedCardPaymentConfig
+  - MakePayment
+  - GetPaymentSources
+- service: HelpersService
+  package: linq.sandbox.helpers.v1
+  file: grpc/linq/sandbox/helpers/v1/helpers.proto
+  sandbox_only: true
+  methods:
+  - VerifyPlayerToken
+  - UpdateOrder
+shared_types:
+- file: grpc/shared/billing_address.proto
+  package: linq.shared
+  messages:
+  - BillingAddress
+- file: grpc/shared/user_location.proto
+  package: linq.shared
+  messages:
+  - UserLocationData
+notes:
+- The docs note that a Play module (Sessions Service, Players Service) is described
+  in the module overview, but no .proto for it is present in the public registry
+  module as of commit 26e57c30eca0422ebe90cfcd1c4b015d.
+- No OpenAPI, GraphQL or AsyncAPI description is published for this API; gRPC is
+  the only published interface contract.

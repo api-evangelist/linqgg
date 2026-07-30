@@ -1,0 +1,26 @@
+generated: '2026-07-19'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: docs.linq.gg
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct  4 11:49:50 2026 GMT
+  hsts: false
+- host: services.galactica.games
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Sep 11 15:56:53 2026 GMT
+  hsts: null
+domains:
+- domain: linq.gg
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: none
+- domain: galactica.games
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: false

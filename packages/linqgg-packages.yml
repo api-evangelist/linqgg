@@ -1,0 +1,83 @@
+generated: '2026-07-19'
+method: searched
+source: https://buf.build/linq/linq/sdks
+description: >-
+  LinQ does not hand-write per-language client libraries. Server-side clients are
+  generated from the public Buf Schema Registry module buf.build/linq/linq and
+  published to Buf's generated-SDK registries (npm-compatible at
+  https://buf.build/gen/npm/v1). The only hand-written first-party library is the
+  Unity SDK, distributed as a Unity package from GitHub.
+registries:
+  buf_generated_npm: https://buf.build/gen/npm/v1
+packages:
+- language: csharp
+  registry: github
+  name: com.galactica.linq (LinQ Unity SDK)
+  url: https://github.com/linqgg/unity-sdk
+  install: Unity Package Manager — add https://github.com/linqgg/unity-sdk as a git package
+  version: v0.8.3
+  released: '2024-11-18'
+  license: MIT
+  official: true
+  notes: >-
+    Handles PCI-compliant native card and Apple Pay checkout, 3DS, Kount anti-fraud
+    device collection, Keychain token storage and App Store country/IP location
+    checks. Requires Google EDM4U and Newtonsoft JSON.NET.
+- language: typescript
+  registry: buf-generated-npm
+  name: '@buf/linq_linq.bufbuild_es'
+  url: https://buf.build/gen/npm/v1/@buf/linq_linq.bufbuild_es
+  install: npm install @buf/linq_linq.bufbuild_es --registry https://buf.build/gen/npm/v1
+  version: 2.9.0-20251020144936-26e57c30eca0.1
+  official: true
+  notes: Generated from the first-party buf.build/linq/linq module (protobuf-es).
+- language: typescript
+  registry: buf-generated-npm
+  name: '@buf/linq_linq.connectrpc_es'
+  url: https://buf.build/gen/npm/v1/@buf/linq_linq.connectrpc_es
+  install: npm install @buf/linq_linq.connectrpc_es --registry https://buf.build/gen/npm/v1
+  version: 1.6.1-20251020144936-26e57c30eca0.2
+  official: true
+  notes: Connect-ES clients generated from the first-party module.
+- language: typescript
+  registry: buf-generated-npm
+  name: '@buf/linq_linq.community_timostamm-protobuf-ts'
+  url: https://buf.build/gen/npm/v1/@buf/linq_linq.community_timostamm-protobuf-ts
+  install: npm install @buf/linq_linq.community_timostamm-protobuf-ts --registry https://buf.build/gen/npm/v1
+  version: 2.9.6-20251020144936-26e57c30eca0.1
+  official: true
+  notes: >-
+    protobuf-ts clients. This is the variant used in the official Getting Started
+    walkthrough, imported as @buf/linq_linq.grpc_web in earlier doc revisions.
+- language: javascript
+  registry: buf-generated-npm
+  name: '@buf/linq_linq.grpc_web'
+  url: https://buf.build/gen/npm/v1/@buf/linq_linq.grpc_web
+  install: npm install @buf/linq_linq.grpc_web --registry https://buf.build/gen/npm/v1
+  version: 2.0.2-20251020144936-26e57c30eca0.1
+  official: true
+  notes: grpc-web clients referenced directly by the Getting Started guide.
+third_party_runtime_dependencies:
+- language: javascript
+  registry: npm
+  name: '@grpc/grpc-js'
+  url: https://www.npmjs.com/package/@grpc/grpc-js
+  install: npm install --save @grpc/grpc-js
+  official: false
+  notes: Required transport, named in the LinQ Getting Started guide.
+- language: javascript
+  registry: npm
+  name: '@protobuf-ts/grpc-transport'
+  url: https://www.npmjs.com/package/@protobuf-ts/grpc-transport
+  install: npm install --save @protobuf-ts/grpc-transport
+  official: false
+  notes: Required transport, named in the LinQ Getting Started guide.
+registries_checked_no_first_party_result:
+- npmjs.com
+- pypi.org
+- maven central
+- nuget.org
+- pkg.go.dev
+- rubygems.org
+- packagist.org
+- crates.io

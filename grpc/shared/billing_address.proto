@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package linq.shared;
+
+// Billing address fields
+message BillingAddress {
+  // two-letter ISO 3166 country code
+  string country = 1;
+  // two-letter state for US, BR
+  string region = 2;
+  // city
+  string city = 3;
+  // street with apt etc
+  string street = 4;
+  // zip or postal code
+  string zip = 5;
+}

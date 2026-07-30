@@ -1,0 +1,179 @@
+// Copyright 2023 Galactica Games Inc.
+
+syntax = "proto3";
+
+package linq.money.payments.v1;
+
+import "google/protobuf/empty.proto";
+import "shared/billing_address.proto";
+
+// Request description for money replenishment
+message OrderReplenishRequest {
+  // Amount in coins, it means that $5 should be 500
+  uint32 amount = 1;
+
+  // Collect user tokenised payment credentials for futher usage
+  // Interanly used property, no need to setup it.
+  optional bool collect = 2;
+
+  // Custom reference identifier for external systems and services
+  // It may be used for storing any external reference ID
+  // for quick search and linking in any reports
+  optional string reference = 3;
+}
+
+// Request for checking status of the payment order
+message OrderStatusRequest {
+  // Order identifier after creations, uuid string
+  string id = 1;
+}
+
+// Information about requested order
+message OrderStatusResponse {
+
+  // Order identifier, uuid string
+  string id = 1;
+
+  // Order status
+  // Possible values:
+  // - pending: just created order
+  // - awaiting: checkout linq created, it is awaiting payment from user
+  // - processing: order handling by services to validate payment internally
+  // - accepted: order was paid and it transaction was applied
+  // - declined: order was declined by payment provides due any kind of error
+  // - completed: order completed and its status may be used as final
+  // - cancelled: order was canceled by user
+  // - terminated: order was canceled by system
+  string status = 2;
+
+  // Amount in the order
+  uint32 amount = 3;
+
+  // Reference data that was placed into the order during the creation
+  string reference = 4;
+
+  // Link for displayning payment form for user
+  // Applicable only for replenish orders
+  optional string checkout = 5;
+}
+
+// Describes order about transfering money from one account to another
+// for a current user
+message TransferOrderRequest {
+
+  // Amount of transaction, should be in coins
+  uint32 amount = 1;
+
+  // Source account token
+  // Means from which account take money
+  string from_asset = 2;
+
+  // Target account token
+  // Means to which account put money
+  string to_asset = 3;
+
+  // Unique key for idempotency
+  optional string idempotency_key = 4;
+
+  // Custom reference identifier for external systems and services
+  // It may be used for storing any external reference ID
+  // for quick search and linking in any reports
+  optional string reference = 5;
+}
+
+// Request for getting actual profile information
+// With currency and balances
+message PaymentProfileRequest {
+  // App store country if available
+  // It is needed for detecting payment profile country
+  // and providing actual profile currency
+  optional string app_store_country = 1;
+}
+
+// Payment profile actual details
+message PaymentProfileResponse {
+  // Payment profile currency, 3-letter code by ISO, like USD, GBP, BRL
+  string currency = 1;
+  // Special session identifier for player profile
+  string identifier = 2;
+  // Payment profile ccountry, 2-letter code by ISO, like US, GB, BR
+  string country = 3;
+}
+
+// Operation types for requesting status of limitations
+enum OperationType {
+  // Depositing operation, like adding money to the account
+  depositing = 0;
+  // Taking money back from an account
+  withdrawal = 1;
+}
+
+// Request description for asking is operation has limitations
+message OperationLimitRequest {
+  // Type of oepration
+  OperationType operation = 1;
+  // How much money the next operation is going to be
+  optional uint32 amount = 2;
+}
+
+// Returns status of the current limitations
+message OperationLimitResponse {
+  // Is operational limit reached or not
+  bool is_reached = 1;
+  // How mush remain to spend before limit reached
+  uint32 remains = 2;
+  // Current limit
+  uint32 limit = 3;
+}
+
+message PixRequest {
+  // Brazil CPF
+  optional string tax_id = 1;
+  // Billing address
+  optional shared.BillingAddress address = 2;
+}
+
+message PixResponse {
+  // Pix code
+  string code = 1;
+}
+
+message PixOrderRequest {
+  // Order params
+  OrderReplenishRequest order = 1;
+  // Specific pix params
+  optional PixRequest pix_params = 2;
+}
+
+message PixOrderResponse {
+  // Common order params
+  OrderStatusResponse order = 1;
+  // Specific pix params
+  PixResponse pix_params = 2;
+}
+
+// Payments service allows to perform operations with money
+// Related to replenishment and withdrawal via LinQ (transfer)
+service PaymentsService {
+
+  // Creates new order for the user with amount and currency
+  // In case order was not processed a new request will return
+  // already existing order with the same ID
+  rpc NewReplenishOrder(OrderReplenishRequest) returns (OrderStatusResponse) {};
+
+  // Creates new order for transfer tokens between accounts
+  rpc NewTransferOrder(TransferOrderRequest) returns (OrderStatusResponse) {};
+
+  // Returns actual status of the requested order
+  // May be useful for confirming that order processed and futher actions allowed
+  rpc GetOrderStatus(OrderStatusRequest) returns (OrderStatusResponse) {};
+
+  // Returns payment profile details
+  rpc GetPaymentProfile(PaymentProfileRequest) returns (PaymentProfileResponse) {};
+
+  // Returns status of operational limit
+  rpc IsLimitReached(OperationLimitRequest) returns (OperationLimitResponse) {};
+
+  // Create new pix order (only for Brazil)
+  rpc CreatePixOrder(PixOrderRequest) returns (PixOrderResponse) {};
+}
