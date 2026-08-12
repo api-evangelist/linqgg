@@ -79,6 +79,8 @@ apis:
   - type: DataModel
     url: data-model/linqgg-data-model.yml
 common:
+- type: MCPServer
+  url: mcp/linqgg-mcp.yml
 - type: DomainSecurity
   url: security/linqgg-domain-security.yml
 - type: Protobuf
