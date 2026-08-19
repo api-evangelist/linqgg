@@ -31,7 +31,7 @@ x-source: vc-portfolio
 x-backed-by:
 - a16z
 x-operator: Galactica Games, Inc. (dba Toffee)
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-07-17'
 modified: '2026-07-19'
 tags:
