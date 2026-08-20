@@ -38,6 +38,17 @@ tags:
 - Company
 - Gaming
 - Payments
+- Wallets
+- Loyalty
+- Fintech
+- Real-Money Gaming
+- gRPC
+- Geolocation
+- Authentication
+tags_raw:
+- Company
+- Gaming
+- Payments
 - Wallet
 - Loyalty
 - Fintech
@@ -58,6 +69,12 @@ apis:
   humanURL: https://docs.linq.gg/
   baseURL: https://services.galactica.games
   tags:
+  - Wallets
+  - Payments
+  - Gaming
+  - gRPC
+  - Protobuf
+  tags_raw:
   - Wallet
   - Payments
   - Gaming
