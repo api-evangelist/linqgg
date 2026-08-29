@@ -13,6 +13,17 @@ description: 'LinQ is the wallet, payments and loyalty platform operated by Gala
   and a first-party Unity SDK handles PCI-compliant native card and Apple Pay checkout
   on device.'
 url: https://raw.githubusercontent.com/api-evangelist/linqgg/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: open
