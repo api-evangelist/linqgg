@@ -64,6 +64,100 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Linq.gg is a company surfaced as a portfolio company of a16z and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+LinQ is the wallet, payments and loyalty platform operated by Galactica Games, Inc. (dba Toffee) for game developers building loyalty programs, real-money gaming (RMG) and branded debit-card experiences. Games integrate a LinQ Wallet account for each player, then deposit, withdraw, transfer and reconcile funds against internal game currencies. The LinQ Wallet Public API is a gRPC / Protocol Buffers surface published on the Buf Schema Registry as buf.build/linq/linq, organised into Geo (IP and coordinate restriction checks), Auth (anonymous game sign-in and wallet-linked user sign-in), Money (accounts, balances, replenishment orders, transfers, Brazil Pix, operations history) and Sandbox (integration-test helpers) modules. Client libraries are generated from the registry for TypeScript, JavaScript and other targets, and a first-party Unity SDK handles PCI-compliant native card and Apple Pay checkout on device.
 
-Backed by: a16z
+**Areas:** Company · Gaming · Payments · Wallets · Loyalty · Fintech · Real-Money Gaming · gRPC · Geolocation · Authentication
+
+## Linq.gg on APIs.io
+
+Everything profiled for Linq.gg is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/linqgg/](https://apis.io/providers/linqgg/)** — or go straight to one of the APIs or properties below.
+
+### APIs (1)
+
+- [LinQ Wallet Public API](https://apis.io/apis/linqgg/linq-wallet-public-api/) — gRPC / Protocol Buffers API for integrating a game with LinQ Wallet services. Covers geo restriction checks by IP and coordinates, anonymous and…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [linqgg](https://apis.io/servers/linqgg/linqgg/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Linqgg Authentication](https://apis.io/security/linqgg/linqgg-authentication/)
+- [Linqgg Domain Security](https://apis.io/security/linqgg/linqgg-domain-security/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.linq.gg/)
+- [Documentation](https://docs.linq.gg/)
+- [Getting started](https://docs.linq.gg/getting-started)
+- [API reference](https://buf.build/linq/linq)
+- [Support](https://docs.linq.gg/contact)
+- [Blog](https://linq.gg/blog)
+- [Terms of service](https://linq.gg/terms-of-use)
+- [Privacy policy](https://linq.gg/privacy-policy)
+- [GitHub](https://github.com/linqgg)
+
+## API Evangelist rating
+
+**Kin Score 41.6** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 24.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 31.6 |
+| Developer ergonomics | 66.1 |
+| Access clarity | 28.9 |
+
+**Agent readiness 20.3** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | — |
+| Event Surface Described | — |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 39.3** — Payments
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/linqgg/](https://apis.io/providers/linqgg/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Linq.gg: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/linqgg/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
